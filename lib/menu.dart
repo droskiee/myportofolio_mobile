@@ -1,5 +1,5 @@
-
 import 'package:flutter/material.dart';
+import 'package:myportofolio_mobile/widgets/left_drawer.dart';
 
 // BLACK CLOVER COLOR PALETTE
 const Color darkBackground = Color(0xFF10100F);
@@ -43,7 +43,7 @@ class MyHomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: darkBackground,
-
+      drawer: const LeftDrawer(),
       body: Stack(
         children: [
           // Background magic decoration
@@ -128,6 +128,15 @@ class MyHomePage extends StatelessWidget {
       ),
       child: Row(
         children: [
+          Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu, color: gold, size: 28),
+            onPressed: () {
+              Scaffold.of(context).openDrawer();
+            },
+          ),
+        ),
+        const SizedBox(width: 8),
           const Icon(
             Icons.filter_vintage,
             color: gold,
