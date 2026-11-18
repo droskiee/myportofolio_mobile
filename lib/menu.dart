@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:myportofolio_mobile/widgets/left_drawer.dart';
+import 'package:myportofolio_mobile/project_form.dart';
 
 // BLACK CLOVER COLOR PALETTE
 const Color darkBackground = Color(0xFF10100F);
@@ -624,6 +625,14 @@ class ItemCard extends StatelessWidget {
                 ),
               ),
             );
+            if (item.name == "Tambah Proyek") {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ProjectFormPage(),
+                ),
+              );
+            }
         },
 
         child: Ink(
