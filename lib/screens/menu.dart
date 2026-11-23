@@ -32,6 +32,13 @@ class MyHomePage extends StatelessWidget {
       const Color(0xFF28613A),
     ),
     ItemHomepage(
+      "Education",
+      "Tambahkan riwayat\npendidikan Anda",
+      Icons.school_rounded,
+      const Color(0xFF30244A),
+      const Color(0xFF514078),
+    ),
+    ItemHomepage(
       "Logout",
       "Keluar dari akun Anda",
       Icons.logout_rounded,

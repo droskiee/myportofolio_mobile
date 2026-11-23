@@ -1,7 +1,8 @@
+
 import 'package:flutter/material.dart';
 import 'package:myportofolio_mobile/screens/menu.dart';
 import 'package:myportofolio_mobile/screens/project_form.dart';
-// TODO: Impor halaman ProjectFormPage jika sudah dibuat
+import 'package:myportofolio_mobile/screens/education_form.dart';
 
 class LeftDrawer extends StatelessWidget {
   const LeftDrawer({super.key});
@@ -46,6 +47,8 @@ class LeftDrawer extends StatelessWidget {
               ],
             ),
           ),
+
+          // HOME
           ListTile(
             leading: const Icon(
               Icons.home_outlined,
@@ -58,7 +61,6 @@ class LeftDrawer extends StatelessWidget {
                 fontFamily: 'serif',
               ),
             ),
-            // Navigasi ke halaman utama portofolio
             onTap: () {
               Navigator.pushReplacement(
                 context,
@@ -68,6 +70,8 @@ class LeftDrawer extends StatelessWidget {
               );
             },
           ),
+
+          // ADD PROJECT
           ListTile(
             leading: const Icon(
               Icons.add_circle_outline,
@@ -80,12 +84,34 @@ class LeftDrawer extends StatelessWidget {
                 fontFamily: 'serif',
               ),
             ),
-            // Navigasi ke halaman tambah proyek
             onTap: () {
               Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const ProjectFormPage(),
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ProjectFormPage(),
+                ),
+              );
+            },
+          ),
+
+          // EDUCATION
+          ListTile(
+            leading: const Icon(
+              Icons.school_outlined,
+              color: Color(0xFFD8B779),
+            ),
+            title: const Text(
+              'Education',
+              style: TextStyle(
+                color: Color(0xFFE8D5AC),
+                fontFamily: 'serif',
+              ),
+            ),
+            onTap: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const EducationFormPage(),
                 ),
               );
             },

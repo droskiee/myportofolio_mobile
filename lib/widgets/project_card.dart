@@ -1,5 +1,7 @@
+
 import 'package:flutter/material.dart';
 import 'package:myportofolio_mobile/screens/project_form.dart';
+import 'package:myportofolio_mobile/screens/education_form.dart';
 
 // HOMEPAGE ITEM DATA
 class ItemHomepage {
@@ -58,6 +60,15 @@ class ItemCard extends StatelessWidget {
               ),
             );
           }
+
+          if (item.name == "Education") {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const EducationFormPage(),
+              ),
+            );
+          }
         },
         child: Ink(
           decoration: BoxDecoration(
@@ -103,6 +114,7 @@ class ItemCard extends StatelessWidget {
                   color: Colors.white.withValues(alpha: 0.07),
                 ),
               ),
+
               // CARD CONTENT
               Center(
                 child: Padding(
