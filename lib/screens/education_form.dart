@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:myportofolio_mobile/widgets/left_drawer.dart';
 
@@ -12,14 +11,10 @@ class EducationFormPage extends StatefulWidget {
 class _EducationFormPageState extends State<EducationFormPage> {
   final _formKey = GlobalKey<FormState>();
 
-  final TextEditingController _institutionController =
-      TextEditingController();
-  final TextEditingController _majorController =
-      TextEditingController();
-  final TextEditingController _startDateController =
-      TextEditingController();
-  final TextEditingController _endDateController =
-      TextEditingController();
+  final TextEditingController _institutionController = TextEditingController();
+  final TextEditingController _majorController = TextEditingController();
+  final TextEditingController _startDateController = TextEditingController();
+  final TextEditingController _endDateController = TextEditingController();
 
   String? _educationLevel = "Bachelor's Degree";
 
@@ -116,33 +111,21 @@ class _EducationFormPageState extends State<EducationFormPage> {
       fillColor: const Color(0xFF171612),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(
-          color: Color(0xFF9C8150),
-        ),
+        borderSide: const BorderSide(color: Color(0xFF9C8150)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(
-          color: Color(0xFFD8B779),
-          width: 2,
-        ),
+        borderSide: const BorderSide(color: Color(0xFFD8B779), width: 2),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(
-          color: Color(0xFFB91C1C),
-        ),
+        borderSide: const BorderSide(color: Color(0xFFB91C1C)),
       ),
       focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(
-          color: Color(0xFFEF4444),
-          width: 2,
-        ),
+        borderSide: const BorderSide(color: Color(0xFFEF4444), width: 2),
       ),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-      ),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
     );
   }
 
@@ -164,10 +147,7 @@ class _EducationFormPageState extends State<EducationFormPage> {
           const SizedBox(height: 4),
           Text(
             value,
-            style: const TextStyle(
-              color: Color(0xFFE8D5AC),
-              fontSize: 14,
-            ),
+            style: const TextStyle(color: Color(0xFFE8D5AC), fontSize: 14),
           ),
         ],
       ),
@@ -183,9 +163,7 @@ class _EducationFormPageState extends State<EducationFormPage> {
           backgroundColor: const Color(0xFF1C1B18),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
-            side: const BorderSide(
-              color: Color(0xFF9C8150),
-            ),
+            side: const BorderSide(color: Color(0xFF9C8150)),
           ),
           title: const Text(
             'Education Saved!',
@@ -204,22 +182,13 @@ class _EducationFormPageState extends State<EducationFormPage> {
                   'Institution Name',
                   _institutionController.text.trim(),
                 ),
-                _buildDialogItem(
-                  'Education Level',
-                  _educationLevel ?? '-',
-                ),
+                _buildDialogItem('Education Level', _educationLevel ?? '-'),
                 _buildDialogItem(
                   'Major / Field of Study',
                   _majorController.text.trim(),
                 ),
-                _buildDialogItem(
-                  'Start Date',
-                  _startDateController.text,
-                ),
-                _buildDialogItem(
-                  'End Date',
-                  _endDateController.text,
-                ),
+                _buildDialogItem('Start Date', _startDateController.text),
+                _buildDialogItem('End Date', _endDateController.text),
               ],
             ),
           ),
@@ -268,10 +237,7 @@ class _EducationFormPageState extends State<EducationFormPage> {
         foregroundColor: const Color(0xFFD8B779),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1.2),
-          child: Container(
-            color: const Color(0xFF9C8150),
-            height: 1.2,
-          ),
+          child: Container(color: const Color(0xFF9C8150), height: 1.2),
         ),
       ),
       drawer: const LeftDrawer(),
@@ -282,9 +248,7 @@ class _EducationFormPageState extends State<EducationFormPage> {
             padding: const EdgeInsets.all(16),
             child: Center(
               child: ConstrainedBox(
-                constraints: const BoxConstraints(
-                  maxWidth: 800,
-                ),
+                constraints: const BoxConstraints(maxWidth: 800),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -306,9 +270,7 @@ class _EducationFormPageState extends State<EducationFormPage> {
                       padding: const EdgeInsets.all(8),
                       child: TextFormField(
                         controller: _institutionController,
-                        style: const TextStyle(
-                          color: Color(0xFFE8D5AC),
-                        ),
+                        style: const TextStyle(color: Color(0xFFE8D5AC)),
                         decoration: _buildInputDecoration(
                           labelText: 'Institution Name',
                           hintText: 'Example: University of Indonesia',
@@ -328,9 +290,7 @@ class _EducationFormPageState extends State<EducationFormPage> {
                       child: DropdownButtonFormField<String>(
                         initialValue: _educationLevel,
                         dropdownColor: const Color(0xFF1C1B18),
-                        style: const TextStyle(
-                          color: Color(0xFFE8D5AC),
-                        ),
+                        style: const TextStyle(color: Color(0xFFE8D5AC)),
                         iconEnabledColor: const Color(0xFFD8B779),
                         decoration: _buildInputDecoration(
                           labelText: 'Education Level',
@@ -360,9 +320,7 @@ class _EducationFormPageState extends State<EducationFormPage> {
                       padding: const EdgeInsets.all(8),
                       child: TextFormField(
                         controller: _majorController,
-                        style: const TextStyle(
-                          color: Color(0xFFE8D5AC),
-                        ),
+                        style: const TextStyle(color: Color(0xFFE8D5AC)),
                         decoration: _buildInputDecoration(
                           labelText: 'Major / Field of Study',
                           hintText: 'Example: Computer Science',
@@ -382,9 +340,7 @@ class _EducationFormPageState extends State<EducationFormPage> {
                       child: TextFormField(
                         controller: _startDateController,
                         readOnly: true,
-                        style: const TextStyle(
-                          color: Color(0xFFE8D5AC),
-                        ),
+                        style: const TextStyle(color: Color(0xFFE8D5AC)),
                         decoration: _buildInputDecoration(
                           labelText: 'Start Date',
                           hintText: 'Select start date',
@@ -394,10 +350,7 @@ class _EducationFormPageState extends State<EducationFormPage> {
                           ),
                         ),
                         onTap: () {
-                          _selectDate(
-                            context,
-                            isStartDate: true,
-                          );
+                          _selectDate(context, isStartDate: true);
                         },
                         validator: (value) {
                           if (_startDate == null) {
@@ -414,9 +367,7 @@ class _EducationFormPageState extends State<EducationFormPage> {
                       child: TextFormField(
                         controller: _endDateController,
                         readOnly: true,
-                        style: const TextStyle(
-                          color: Color(0xFFE8D5AC),
-                        ),
+                        style: const TextStyle(color: Color(0xFFE8D5AC)),
                         decoration: _buildInputDecoration(
                           labelText: 'End Date',
                           hintText: 'Select end date',
@@ -426,10 +377,7 @@ class _EducationFormPageState extends State<EducationFormPage> {
                           ),
                         ),
                         onTap: () {
-                          _selectDate(
-                            context,
-                            isStartDate: false,
-                          );
+                          _selectDate(context, isStartDate: false);
                         },
                         validator: (value) {
                           if (_endDate == null) {

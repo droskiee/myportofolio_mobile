@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:myportofolio_mobile/models/project.dart';
+import 'package:myportofolio_mobile/services/api_client.dart';
+import 'package:myportofolio_mobile/services/auth_state.dart';
+import 'package:myportofolio_mobile/widgets/auth_guard.dart';
 import 'package:myportofolio_mobile/widgets/left_drawer.dart';
+import 'package:provider/provider.dart';
 
 class ProjectFormPage extends StatefulWidget {
   const ProjectFormPage({super.key});
@@ -10,214 +15,238 @@ class ProjectFormPage extends StatefulWidget {
 
 class _ProjectFormPageState extends State<ProjectFormPage> {
   final _formKey = GlobalKey<FormState>();
+  final _titleController = TextEditingController();
+  final _descriptionController = TextEditingController();
+  final _techStackController = TextEditingController();
+  final _projectUrlController = TextEditingController();
+  final _imageUrlController = TextEditingController();
+  bool _isSubmitting = false;
 
-  String _projectName = "";
-  String _description = "";
-  String _category = "Web Development"; // default
-  String _technologies = "";
-  String _projectLink = "";
-
-  final List<String> _categories = [
-    'Web Development',
-    'Mobile Development',
-    'Machine Learning',
-    'Data Science',
-    'Other',
-  ];
-
-  // Helper styling dekorasi input bertema Grimoire
-  InputDecoration _buildInputDecoration({
-    required String labelText,
-    String? hintText,
-  }) {
-    return InputDecoration(
-      hintText: hintText,
-      hintStyle: TextStyle(
-        color: const Color(0xFFE8D5AC).withValues(alpha: 0.45),
-      ),
-      labelText: labelText,
-      labelStyle: const TextStyle(
-        color: Color(0xFFD8B779),
-        fontFamily: 'serif',
-      ),
-      filled: true,
-      fillColor: const Color(0xFF171612),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8.0),
-        borderSide: const BorderSide(color: Color(0xFF9C8150)),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8.0),
-        borderSide: const BorderSide(
-          color: Color(0xFFD8B779),
-          width: 2.0,
-        ),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8.0),
-        borderSide: const BorderSide(color: Color(0xFFB91C1C)),
-      ),
-      focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8.0),
-        borderSide: const BorderSide(color: Color(0xFFEF4444), width: 2.0),
-      ),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8.0),
-      ),
-    );
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _descriptionController.dispose();
+    _techStackController.dispose();
+    _projectUrlController.dispose();
+    _imageUrlController.dispose();
+    super.dispose();
   }
+
+  Future<void> _submit() async {
+    if (_isSubmitting || !_formKey.currentState!.validate()) return;
+    if (!await ensureLoggedIn(context) || !mounted) return;
+
+    final token = context.read<AuthState>().token;
+    if (token == null || token.isEmpty) return;
+
+    setState(() => _isSubmitting = true);
+    try {
+      final project = Project(
+        title: _titleController.text.trim(),
+        description: _descriptionController.text.trim(),
+        techStack: _techStackController.text.trim(),
+        projectUrl: _projectUrlController.text.trim(),
+        projectImageUrl: _imageUrlController.text.trim().isEmpty
+            ? ''
+            : _imageUrlController.text.trim(),
+      );
+      await context.read<ApiClient>().createProject(project, token: token);
+      if (!mounted) return;
+
+      _resetForm();
+      await showDialog<void>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          backgroundColor: const Color(0xFF171612),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+            side: const BorderSide(color: Color(0xFFD8B779), width: 1.5),
+          ),
+          title: const Text(
+            'Project created successfully.',
+            style: TextStyle(
+              color: Color(0xFFD8B779),
+              fontFamily: 'serif',
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: const Text(
+            'The project has been added to your portfolio.',
+            style: TextStyle(color: Color(0xFFE8D5AC)),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text(
+                'OK',
+                style: TextStyle(color: Color(0xFFD8B779)),
+              ),
+            ),
+          ],
+        ),
+      );
+    } on ApiException catch (error) {
+      if (!mounted) return;
+      if (error.statusCode == 401) {
+        try {
+          await context.read<AuthState>().logout();
+        } catch (_) {
+          // AuthState clears the local token even when the server rejects it.
+        }
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Your session expired. Please log in again.'),
+          ),
+        );
+        await ensureLoggedIn(context);
+      } else {
+        final message = error.statusCode == 403
+            ? '${error.message} Project creation is restricted to the portfolio superuser.'
+            : error.message;
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(message)));
+      }
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not create the project: $error')),
+      );
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
+  }
+
+  void _resetForm() {
+    _formKey.currentState?.reset();
+    _titleController.clear();
+    _descriptionController.clear();
+    _techStackController.clear();
+    _projectUrlController.clear();
+    _imageUrlController.clear();
+  }
+
+  String? _validateUrl(String? value, {required bool optional}) {
+    final trimmed = value?.trim() ?? '';
+    if (trimmed.isEmpty) {
+      return optional ? null : 'Enter the project URL.';
+    }
+    final uri = Uri.tryParse(trimmed);
+    if (uri == null ||
+        !(uri.scheme == 'http' || uri.scheme == 'https') ||
+        uri.host.isEmpty) {
+      return 'Enter a valid URL beginning with http:// or https://.';
+    }
+    return null;
+  }
+
+  InputDecoration _decoration(String label, {String? hint}) => InputDecoration(
+    labelText: label,
+    hintText: hint,
+    hintStyle: TextStyle(
+      color: const Color(0xFFE8D5AC).withValues(alpha: 0.45),
+    ),
+    labelStyle: const TextStyle(color: Color(0xFFD8B779), fontFamily: 'serif'),
+    filled: true,
+    fillColor: const Color(0xFF171612),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(8),
+      borderSide: const BorderSide(color: Color(0xFF9C8150)),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(8),
+      borderSide: const BorderSide(color: Color(0xFFD8B779), width: 2),
+    ),
+    errorBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(8),
+      borderSide: const BorderSide(color: Color(0xFFB91C1C)),
+    ),
+    focusedErrorBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(8),
+      borderSide: const BorderSide(color: Color(0xFFEF4444), width: 2),
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF10100F),
       appBar: AppBar(
-        title: const Center(
-          child: Text(
-            'Add Project Form',
-            style: TextStyle(
-              fontFamily: 'serif',
-              fontWeight: FontWeight.bold,
-              color: Color(0xFFE8D5AC),
-            ),
+        title: const Text(
+          'Add Project Form',
+          style: TextStyle(
+            fontFamily: 'serif',
+            fontWeight: FontWeight.bold,
+            color: Color(0xFFE8D5AC),
           ),
         ),
         backgroundColor: const Color(0xFF171612),
         foregroundColor: const Color(0xFFD8B779),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1.2),
-          child: Container(
-            color: const Color(0xFF9C8150),
-            height: 1.2,
-          ),
+          child: Container(color: const Color(0xFF9C8150), height: 1.2),
         ),
       ),
       drawer: const LeftDrawer(),
       body: Form(
         key: _formKey,
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16),
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 800),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // === Project Name ===
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: TextFormField(
-                      style: const TextStyle(color: Color(0xFFE8D5AC)),
-                      decoration: _buildInputDecoration(
-                        hintText: "Nama Proyek",
-                        labelText: "Nama Proyek",
-                      ),
-                      onChanged: (String? value) {
-                        setState(() {
-                          _projectName = value!;
-                        });
-                      },
-                      validator: (String? value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return "Nama proyek tidak boleh kosong!";
-                        }
-                        return null;
-                      },
-                    ),
+                  _field(
+                    controller: _titleController,
+                    label: 'Project title',
+                    validator: (value) => value == null || value.trim().isEmpty
+                        ? 'Project title cannot be empty.'
+                        : null,
                   ),
-
-                  // === Description ===
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: TextFormField(
-                      maxLines: 5,
-                      style: const TextStyle(color: Color(0xFFE8D5AC)),
-                      decoration: _buildInputDecoration(
-                        hintText: "Deskripsi Proyek",
-                        labelText: "Deskripsi Proyek",
-                      ),
-                      onChanged: (String? value) {
-                        setState(() {
-                          _description = value!;
-                        });
-                      },
-                      validator: (String? value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return "Deskripsi proyek tidak boleh kosong!";
-                        }
-                        return null;
-                      },
-                    ),
+                  _field(
+                    controller: _descriptionController,
+                    label: 'Description',
+                    maxLines: 5,
+                    validator: (value) => value == null || value.trim().isEmpty
+                        ? 'Description cannot be empty.'
+                        : null,
                   ),
-
-                  // === Category ===
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: DropdownButtonFormField<String>(
-                      dropdownColor: const Color(0xFF1C1B18),
-                      style: const TextStyle(color: Color(0xFFE8D5AC)),
-                      iconEnabledColor: const Color(0xFFD8B779),
-                      decoration: _buildInputDecoration(
-                        labelText: "Kategori Proyek",
-                      ),
-                      initialValue: _category,
-                      items: _categories
-                          .map((category) => DropdownMenuItem(
-                                value: category,
-                                child: Text(category),
-                              ))
-                          .toList(),
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          _category = newValue!;
-                        });
-                      },
-                    ),
+                  _field(
+                    controller: _techStackController,
+                    label: 'Tech stack',
+                    hint: 'Example: Flutter, Django, Figma',
+                    validator: (value) => value == null || value.trim().isEmpty
+                        ? 'Enter the project tech stack.'
+                        : null,
                   ),
-
-                  // === Technologies ===
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: TextFormField(
-                      style: const TextStyle(color: Color(0xFFE8D5AC)),
-                      decoration: _buildInputDecoration(
-                        hintText: "Contoh: Flutter, Django, Figma",
-                        labelText: "Teknologi yang Digunakan",
-                      ),
-                      onChanged: (String? value) {
-                        setState(() {
-                          _technologies = value!;
-                        });
-                      },
-                    ),
+                  _field(
+                    controller: _projectUrlController,
+                    label: 'Project URL',
+                    hint: 'https://example.com',
+                    keyboardType: TextInputType.url,
+                    validator: (value) => _validateUrl(value, optional: false),
                   ),
-
-                  // === Project Link ===
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: TextFormField(
-                      style: const TextStyle(color: Color(0xFFE8D5AC)),
-                      decoration: _buildInputDecoration(
-                        hintText: "URL Proyek (opsional)",
-                        labelText: "Tautan Proyek",
-                      ),
-                      onChanged: (String? value) {
-                        setState(() {
-                          _projectLink = value!;
-                        });
-                      },
-                    ),
+                  _field(
+                    controller: _imageUrlController,
+                    label: 'Project image URL (optional)',
+                    hint: 'https://example.com/image.png',
+                    keyboardType: TextInputType.url,
+                    validator: (value) => _validateUrl(value, optional: true),
                   ),
-
-                  // === Tombol Simpan ===
                   Align(
-                    alignment: Alignment.bottomCenter,
+                    alignment: Alignment.center,
                     child: Padding(
-                      padding: const EdgeInsets.all(16.0),
+                      padding: const EdgeInsets.all(16),
                       child: ElevatedButton(
+                        onPressed: _isSubmitting ? null : _submit,
                         style: ButtonStyle(
                           backgroundColor: WidgetStateProperty.all(
                             const Color(0xFF183D28),
+                          ),
+                          foregroundColor: WidgetStateProperty.all(
+                            const Color(0xFFE8D5AC),
                           ),
                           side: WidgetStateProperty.all(
                             const BorderSide(
@@ -231,109 +260,24 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
                               vertical: 14,
                             ),
                           ),
-                          shape: WidgetStateProperty.all(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
                         ),
-                        onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-                            showDialog(
-                              context: context,
-                              builder: (context) {
-                                return AlertDialog(
-                                  backgroundColor: const Color(0xFF171612),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(14),
-                                    side: const BorderSide(
-                                      color: Color(0xFFD8B779),
-                                      width: 1.5,
-                                    ),
-                                  ),
-                                  title: const Text(
-                                    'Proyek berhasil ditambahkan!',
-                                    style: TextStyle(
-                                      color: Color(0xFFD8B779),
-                                      fontFamily: 'serif',
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  content: SingleChildScrollView(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(
-                                          'Nama: $_projectName',
-                                          style: const TextStyle(
-                                            color: Color(0xFFE8D5AC),
-                                          ),
-                                        ),
-                                        Text(
-                                          'Deskripsi: $_description',
-                                          style: const TextStyle(
-                                            color: Color(0xFFE8D5AC),
-                                          ),
-                                        ),
-                                        Text(
-                                          'Kategori: $_category',
-                                          style: const TextStyle(
-                                            color: Color(0xFFE8D5AC),
-                                          ),
-                                        ),
-                                        Text(
-                                          'Teknologi: ${_technologies.isEmpty ? "-" : _technologies}',
-                                          style: const TextStyle(
-                                            color: Color(0xFFE8D5AC),
-                                          ),
-                                        ),
-                                        Text(
-                                          'Tautan: ${_projectLink.isEmpty ? "-" : _projectLink}',
-                                          style: const TextStyle(
-                                            color: Color(0xFFE8D5AC),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      child: const Text(
-                                        'OK',
-                                        style: TextStyle(
-                                          color: Color(0xFFD8B779),
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      onPressed: () {
-                                        Navigator.pop(context);
-                                        _formKey.currentState!.reset();
-                                        setState(() {
-                                          _projectName = "";
-                                          _description = "";
-                                          _category = "Web Development";
-                                          _technologies = "";
-                                          _projectLink = "";
-                                        });
-                                      },
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-                          }
-                        },
-                        child: const Text(
-                          "Save",
-                          style: TextStyle(
-                            color: Color(0xFFE8D5AC),
-                            fontFamily: 'serif',
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
+                        child: _isSubmitting
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Color(0xFFE8D5AC),
+                                ),
+                              )
+                            : const Text(
+                                'Save project',
+                                style: TextStyle(
+                                  fontFamily: 'serif',
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
                       ),
                     ),
                   ),
@@ -345,4 +289,23 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
       ),
     );
   }
+
+  Widget _field({
+    required TextEditingController controller,
+    required String label,
+    String? hint,
+    int maxLines = 1,
+    TextInputType? keyboardType,
+    FormFieldValidator<String>? validator,
+  }) => Padding(
+    padding: const EdgeInsets.all(8),
+    child: TextFormField(
+      controller: controller,
+      maxLines: maxLines,
+      keyboardType: keyboardType,
+      style: const TextStyle(color: Color(0xFFE8D5AC)),
+      decoration: _decoration(label, hint: hint),
+      validator: validator,
+    ),
+  );
 }

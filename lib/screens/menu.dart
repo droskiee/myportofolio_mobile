@@ -56,9 +56,7 @@ class MyHomePage extends StatelessWidget {
         children: [
           // Background magic decoration
           Positioned.fill(
-            child: CustomPaint(
-              painter: MagicBackgroundPainter(),
-            ),
+            child: CustomPaint(painter: MagicBackgroundPainter()),
           ),
           SafeArea(
             child: SingleChildScrollView(
@@ -75,9 +73,7 @@ class MyHomePage extends StatelessWidget {
                     ),
                     child: Center(
                       child: ConstrainedBox(
-                        constraints: const BoxConstraints(
-                          maxWidth: 1250,
-                        ),
+                        constraints: const BoxConstraints(maxWidth: 1250),
                         child: Column(
                           children: [
                             // HERO SECTION
@@ -116,18 +112,10 @@ class MyHomePage extends StatelessWidget {
   Widget _buildHeader() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(
-        horizontal: 35,
-        vertical: 20,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 35, vertical: 20),
       decoration: const BoxDecoration(
         color: Color(0xFF171612),
-        border: Border(
-          bottom: BorderSide(
-            color: mutedGold,
-            width: 1.2,
-          ),
-        ),
+        border: Border(bottom: BorderSide(color: mutedGold, width: 1.2)),
       ),
       child: Row(
         children: [
@@ -140,11 +128,7 @@ class MyHomePage extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          const Icon(
-            Icons.filter_vintage,
-            color: gold,
-            size: 38,
-          ),
+          const Icon(Icons.filter_vintage, color: gold, size: 38),
           const SizedBox(width: 14),
           const Text(
             "MyPortfolio",
@@ -175,17 +159,11 @@ class MyHomePage extends StatelessWidget {
   Widget _buildHero() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(
-        horizontal: 30,
-        vertical: 35,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 35),
       decoration: BoxDecoration(
         color: const Color(0xFF171612),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: mutedGold.withValues(alpha: 0.6),
-          width: 1,
-        ),
+        border: Border.all(color: mutedGold.withValues(alpha: 0.6), width: 1),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.4),
@@ -311,21 +289,9 @@ class MyHomePage extends StatelessWidget {
       builder: (context, constraints) {
         bool isSmall = constraints.maxWidth < 650;
         List<Widget> cards = [
-          InfoCard(
-            title: "NPM",
-            content: npm,
-            icon: Icons.memory_rounded,
-          ),
-          InfoCard(
-            title: "Name",
-            content: nama,
-            icon: Icons.person_rounded,
-          ),
-          InfoCard(
-            title: "Class",
-            content: kelas,
-            icon: Icons.school_rounded,
-          ),
+          InfoCard(title: "NPM", content: npm, icon: Icons.memory_rounded),
+          InfoCard(title: "Name", content: nama, icon: Icons.person_rounded),
+          InfoCard(title: "Class", content: kelas, icon: Icons.school_rounded),
         ];
 
         return Wrap(
@@ -370,17 +336,10 @@ class MyHomePage extends StatelessWidget {
         ),
         const SizedBox(width: 15),
         Expanded(
-          child: Container(
-            height: 1,
-            color: mutedGold.withValues(alpha: 0.5),
-          ),
+          child: Container(height: 1, color: mutedGold.withValues(alpha: 0.5)),
         ),
         const SizedBox(width: 12),
-        const Icon(
-          Icons.filter_vintage,
-          color: gold,
-          size: 27,
-        ),
+        const Icon(Icons.filter_vintage, color: gold, size: 27),
       ],
     );
   }
@@ -392,8 +351,8 @@ class MyHomePage extends StatelessWidget {
         int columns = constraints.maxWidth >= 850
             ? 3
             : constraints.maxWidth >= 550
-                ? 2
-                : 1;
+            ? 2
+            : 1;
         double spacing = 15;
         double cardWidth =
             (constraints.maxWidth - (spacing * (columns - 1))) / columns;
@@ -417,27 +376,17 @@ class MyHomePage extends StatelessWidget {
   Widget _buildFooter() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(
-        horizontal: 20,
-        vertical: 22,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
       decoration: BoxDecoration(
         color: const Color(0xFF1B1915),
         border: Border(
-          top: BorderSide(
-            color: mutedGold.withValues(alpha: 0.7),
-            width: 1,
-          ),
+          top: BorderSide(color: mutedGold.withValues(alpha: 0.7), width: 1),
         ),
       ),
       child: const Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.favorite,
-            color: gold,
-            size: 19,
-          ),
+          Icon(Icons.favorite, color: gold, size: 19),
           SizedBox(width: 12),
           Flexible(
             child: Text(
@@ -475,18 +424,12 @@ class InfoCard extends StatelessWidget {
       padding: const EdgeInsets.all(17),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [
-            Color(0xFFEADAB9),
-            Color(0xFFD6BD8D),
-          ],
+          colors: [Color(0xFFEADAB9), Color(0xFFD6BD8D)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: gold,
-          width: 2,
-        ),
+        border: Border.all(color: gold, width: 2),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.35),
@@ -502,16 +445,9 @@ class InfoCard extends StatelessWidget {
             decoration: BoxDecoration(
               color: darkBackground,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: gold,
-                width: 1.5,
-              ),
+              border: Border.all(color: gold, width: 1.5),
             ),
-            child: Icon(
-              icon,
-              color: gold,
-              size: 27,
-            ),
+            child: Icon(icon, color: gold, size: 27),
           ),
           const SizedBox(width: 15),
           Expanded(
@@ -557,10 +493,7 @@ class MagicBackgroundPainter extends CustomPainter {
       ..strokeWidth = 1;
 
     // Large magic circle
-    final Offset center = Offset(
-      size.width * 0.85,
-      size.height * 0.27,
-    );
+    final Offset center = Offset(size.width * 0.85, size.height * 0.27);
 
     canvas.drawCircle(center, 115, paint);
     canvas.drawCircle(center, 135, paint);
@@ -587,18 +520,12 @@ class MagicBackgroundPainter extends CustomPainter {
     final TextPainter clover = TextPainter(
       text: TextSpan(
         text: "✦",
-        style: TextStyle(
-          color: gold.withValues(alpha: 0.08),
-          fontSize: 45,
-        ),
+        style: TextStyle(color: gold.withValues(alpha: 0.08), fontSize: 45),
       ),
       textDirection: TextDirection.ltr,
     );
     clover.layout();
-    clover.paint(
-      canvas,
-      Offset(size.width * 0.08, size.height * 0.55),
-    );
+    clover.paint(canvas, Offset(size.width * 0.08, size.height * 0.55));
   }
 
   @override

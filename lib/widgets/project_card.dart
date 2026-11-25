@@ -1,7 +1,11 @@
-
 import 'package:flutter/material.dart';
+import 'package:myportofolio_mobile/screens/login_screen.dart';
+import 'package:myportofolio_mobile/screens/project_list_screen.dart';
 import 'package:myportofolio_mobile/screens/project_form.dart';
 import 'package:myportofolio_mobile/screens/education_form.dart';
+import 'package:myportofolio_mobile/services/auth_state.dart';
+import 'package:myportofolio_mobile/widgets/auth_guard.dart';
+import 'package:provider/provider.dart';
 
 // HOMEPAGE ITEM DATA
 class ItemHomepage {
@@ -36,7 +40,7 @@ class ItemCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(15),
       child: InkWell(
         borderRadius: BorderRadius.circular(15),
-        onTap: () {
+        onTap: () async {
           ScaffoldMessenger.of(context)
             ..hideCurrentSnackBar()
             ..showSnackBar(
@@ -45,46 +49,63 @@ class ItemCard extends StatelessWidget {
                 behavior: SnackBarBehavior.floating,
                 content: Text(
                   "Kamu telah menekan tombol ${item.name}!",
-                  style: const TextStyle(
-                    color: parchment,
-                  ),
+                  style: const TextStyle(color: parchment),
                 ),
               ),
             );
 
-          if (item.name == "Tambah Proyek") {
+          if (item.name == "Lihat Proyek") {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => const ProjectFormPage(),
+                builder: (context) => const ProjectListScreen(),
               ),
             );
-          }
-
-          if (item.name == "Education") {
+          } else if (item.name == "Tambah Proyek") {
+            if (!await ensureLoggedIn(context) || !context.mounted) return;
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const ProjectFormPage()),
+            );
+          } else if (item.name == "Education") {
             Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (context) => const EducationFormPage(),
               ),
             );
+          } else if (item.name == "Logout") {
+            final authState = context.read<AuthState>();
+            if (!authState.isLoggedIn) {
+              await Navigator.push<bool>(
+                context,
+                MaterialPageRoute(builder: (_) => const LoginScreen()),
+              );
+              return;
+            }
+            try {
+              await authState.logout();
+              if (!context.mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('You have been logged out.')),
+              );
+            } catch (error) {
+              if (!context.mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Logout completed locally: $error')),
+              );
+            }
           }
         },
         child: Ink(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [
-                item.color,
-                item.secondaryColor,
-              ],
+              colors: [item.color, item.secondaryColor],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             borderRadius: BorderRadius.circular(15),
-            border: Border.all(
-              color: gold,
-              width: 1.5,
-            ),
+            border: Border.all(color: gold, width: 1.5),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.4),
@@ -132,11 +153,7 @@ class ItemCard extends StatelessWidget {
                             width: 1.5,
                           ),
                         ),
-                        child: Icon(
-                          item.icon,
-                          color: parchment,
-                          size: 38,
-                        ),
+                        child: Icon(item.icon, color: parchment, size: 38),
                       ),
                       const SizedBox(height: 18),
                       Text(
@@ -164,10 +181,7 @@ class ItemCard extends StatelessWidget {
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          border: Border.all(
-                            color: gold,
-                            width: 1.5,
-                          ),
+                          border: Border.all(color: gold, width: 1.5),
                         ),
                         child: const Icon(
                           Icons.arrow_forward_rounded,
